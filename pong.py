@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import pygame
+import pandas as pd
 
-# Variables
+# variables
 WIDTH = 1200
 HEIGHT = 600
 BORDER = 20
-VELOCITY = 1
+VELOCITY = 2
 FRAMERATE = 320
 
-# Classes
+# classes
 class Ball:
     RADIUS = 20
     
@@ -21,12 +22,9 @@ class Ball:
         self.vy = vy
         
     def show(self, colour):
-        global screen
         pygame.draw.circle(screen, colour, (self.x, self.y), self.RADIUS)
    
-    def update(self, paddle):
-        global bgColor, fgColor
-        
+    def update(self):
         newx = self.x + self.vx
         newy = self.y + self.vy
         
@@ -34,12 +32,13 @@ class Ball:
             self.vx = -self.vx
         elif newy < BORDER+self.RADIUS or newy > HEIGHT-BORDER-self.RADIUS:
             self.vy = -self.vy
-        elif newx+Ball.RADIUS > WIDTH-Paddle.WIDTH and abs(newy-paddle.y) < Paddle.HEIGHT//2:
+        elif newx+Ball.RADIUS > WIDTH-Paddle.WIDTH \
+            and abs(newy-paddle.y) < Paddle.HEIGHT//2:
             self.vx = -self.vx
         else:
             self.show(bgColor)
-            self.x += self.vx
-            self.y += self.vy
+            self.x = newx
+            self.y = newy
             self.show(fgColor)
         
 class Paddle:    
@@ -50,20 +49,25 @@ class Paddle:
         self.y = y
     
     def show(self,colour):
-        global screen
-        pygame.draw.rect(screen, colour, pygame.Rect(WIDTH-self.WIDTH, self.y-self.HEIGHT//2, self.WIDTH, self.HEIGHT))
+        pygame.draw.rect(screen, colour, 
+                         pygame.Rect(WIDTH-self.WIDTH, 
+                                     self.y-self.HEIGHT//2, 
+                                     self.WIDTH, self.HEIGHT))
         
-    def update(self):
-        global bgColor, fgColor
-        
+    def update(self):        
         newy = pygame.mouse.get_pos()[1]
-        
-        if newy < BORDER+self.HEIGHT//2 or newy > HEIGHT-BORDER-self.HEIGHT//2:
-            pass
-        else:            
-            self.show(bgColor)
-            self.y = newy
-            self.show(fgColor)
+        if newy-self.HEIGHT//2>BORDER \
+            and newy+self.HEIGHT//2<HEIGHT-BORDER:
+                self.show(bgColor)
+                self.y = newy
+                self.show(fgColor)
+
+    def updateIA(self, newy):        
+        if newy-self.HEIGHT//2>BORDER \
+            and newy+self.HEIGHT//2<HEIGHT-BORDER:
+                self.show(bgColor)
+                self.y = newy
+                self.show(fgColor)
 
 
 # start the scenario
@@ -79,14 +83,30 @@ pygame.draw.rect(screen, fgColor, pygame.Rect(0,0,BORDER,HEIGHT))
 pygame.draw.rect(screen, fgColor, pygame.Rect(0,HEIGHT-BORDER,WIDTH,BORDER))
 
 # draw ball and paddle
-ballplay = Ball(WIDTH-Ball.RADIUS-Paddle.WIDTH, HEIGHT//2, -VELOCITY, VELOCITY)
-ballplay.show(fgColor)
+ball = Ball(WIDTH-Ball.RADIUS-Paddle.WIDTH, HEIGHT//2, -VELOCITY, VELOCITY-1)
+ball.show(fgColor)
 
-paddleplay = Paddle(HEIGHT//2)
-paddleplay.show(fgColor)
+paddle = Paddle(HEIGHT//2)
+paddle.show(fgColor)
 
-# clock for ball velocity
 clock = pygame.time.Clock()
+
+# file to take data
+#sample = open("game.csv", "w")
+#print("x,y,vx,vy,paddle.y", file=sample)
+
+pong = pd.read_csv('game.csv')
+pong = pong.drop_duplicates()
+
+X = pong.drop(columns="paddle.y")
+y = pong['paddle.y']
+
+from sklearn.neighbors import KNeighborsRegressor
+
+clf = KNeighborsRegressor(n_neighbors=3)
+clf.fit(X,y)
+
+df = pd.DataFrame(columns=['x', 'y', 'vx', 'vy'])
 
 while True:
     e = pygame.event.poll()
@@ -97,7 +117,16 @@ while True:
     
     pygame.display.flip()
     
-    ballplay.update(paddleplay)
-    paddleplay.update()
+    toPredict = df.append({'x': ball.x, 'y': ball.y, 'vx': ball.vx,
+                           'vy': ball.vy,}, ignore_index=True)
+    
+    shouldMove = clf.predict(toPredict)
+    paddle.updateIA(shouldMove)
+    
+    #paddle.update()
+    ball.update()
+    
+    #print("{}, {}, {}, {}, {}".format(ball.x, ball.y, ball.vx,ball.vy,
+    #                                  paddle.y),file=sample)
     
 pygame.quit()
