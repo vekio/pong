@@ -1,0 +1,8 @@
+# conda env create -f enviroment.yml
+name: pong
+channels:
+    - cogsci
+dependencies:
+    - python=3
+    - pandas
+    - pygame
