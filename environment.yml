@@ -1,9 +1,11 @@
 # conda env create -f enviroment.yml
 name: pong
 channels:
-    - cogsci
+    - conda-forge
 dependencies:
-    - python=3
+    - pip
+    - pylint
+    - python=3.7
+    - notebook
     - pandas
-    - pygame
     - scikit-learn
