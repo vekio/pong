@@ -1,3 +1,2 @@
-.spyproject
-.ipynb*
 .vscode
+__pycache__

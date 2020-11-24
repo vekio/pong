@@ -1,4 +1,8 @@
-from pong import Pong
+from manager import Manager
 
-pong = Pong()
+def main():
+    print("Welcome to Pong!")
+    Manager()
 
+if __name__ == "__main__":
+    main()
