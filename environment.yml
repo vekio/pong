@@ -1,11 +1,15 @@
 # conda env create -f enviroment.yml
+# conda activate pong
+#
+# install pygame from pip
+# python -m pip install -U pygame --user
 name: pong
 channels:
-    - conda-forge
+    - conda-forge   # pip
 dependencies:
     - pip
     - pylint
-    - python=3.7
+    - python=3.8
     - notebook
     - pandas
     - scikit-learn
