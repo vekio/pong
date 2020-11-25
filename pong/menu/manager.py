@@ -7,4 +7,4 @@ class Singleton(type):
 
 class Manager(metaclass=Singleton):
     def MainMenu(self):
-        pass
+        print(">> MainMenu")

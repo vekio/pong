@@ -2,7 +2,7 @@
 # conda activate pong
 #
 # install pygame from pip
-# python -m pip install -U pygame --user
+# python -m pip install pygame
 name: pong-develop
 channels:
     - conda-forge   # pip

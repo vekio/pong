@@ -1,8 +1,8 @@
-from manager import Manager
+from menu import Manager
 
 def main():
     print("Welcome to Pong!")
-    Manager()
+    Manager().MainMenu()
 
 if __name__ == "__main__":
     main()
