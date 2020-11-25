@@ -3,7 +3,7 @@
 #
 # install pygame from pip
 # python -m pip install -U pygame --user
-name: pong
+name: pong-develop
 channels:
     - conda-forge   # pip
 dependencies:
